@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Types (gate 1)
+        run: npm run typecheck
+      - name: Logic regression and both UI languages (gate 2, without the server part)
+        run: npx tsx scripts/regress.ts
+        env:
+          BASE_URL: http://127.0.0.1:9
+          ALON_DATA_DIR: ${{ runner.temp }}/alon-ci-data
+      - name: Known vulnerabilities in npm dependencies
+        run: npm audit --audit-level=high

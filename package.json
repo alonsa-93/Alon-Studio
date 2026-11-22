@@ -1,0 +1,52 @@
+{
+  "name": "alon-studio",
+  "version": "1.0.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "description": "ALON.ai Studio - local browser video editor (Vite + React + Express + ffmpeg)",
+  "scripts": {
+    "start": "tsx server/index.ts",
+    "dev": "tsx watch --include \"server/**\" --include \"shared/**\" server/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "tsx scripts/e2e.ts",
+    "release": "node scripts/build-release.mjs",
+    "test:ui": "node scripts/ui/user-journey.mjs",
+    "security:check": "node scripts/security-check.mjs",
+    "test:security": "tsx scripts/security-tests.ts",
+    "release:docs": "node scripts/release-docs.mjs",
+    "release:zip": "python -I scripts/package-zip.py release",
+    "release:setup": "node scripts/build-installer.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.12.0",
+    "@fontsource/assistant": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "express": "^4.21.2",
+    "multer": "^2.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsx": "^4.19.2",
+    "vite": "^6.0.5",
+    "zod": "^4.6.7",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@^4.30.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
