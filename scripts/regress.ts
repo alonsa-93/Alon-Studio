@@ -262,7 +262,9 @@ console.log('AI: change list, translation, settings');
 }
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:5173';
-try {
+// REGRESS_OFFLINE=1 (CI) skips the checks that need a running server; otherwise a missing server fails
+if (process.env.REGRESS_OFFLINE === '1') console.log('(http checks skipped: REGRESS_OFFLINE=1)');
+else try {
   await fetch(BASE + '/api/health');
   console.log('http');
   const j = async (url: string, init?: RequestInit) => {
@@ -300,7 +302,8 @@ try {
   for (const [u, m] of aiRoutes) refused.push(await noKey(u, m));
   check(refused.every((x) => x === 401), `no key -> 401 on the ${aiRoutes.length} AI routes (${refused.join(',')})`);
 } catch (e) {
-  console.log(`(http checks skipped: ${(e as Error).message})`);
+  console.log(`  FAIL http checks against ${BASE}: ${(e as Error).message}`);
+  failures++;
 }
 // both UI languages complete (scripts/i18n-check.ts)
 try {

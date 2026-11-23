@@ -15,7 +15,7 @@ import { execFileSync } from 'node:child_process';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const REL = path.resolve(process.argv[2] ?? path.join(ROOT, 'release', 'ALON Studio'));
 const SP = path.join(REL, 'runtime', 'python', 'Lib', 'site-packages');
-const VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+const { version: VERSION, license: LICENSE } = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const OWN_OUTPUTS = new Set(['sbom.cdx.json', 'THIRD-PARTY-NOTICES.txt', 'SHA256SUMS.txt']);
 const sha256 = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
@@ -141,7 +141,7 @@ const bom = {
   metadata: {
     timestamp: new Date().toISOString(),
     tools: { components: [{ type: 'application', name: 'scripts/release-docs.mjs', version: VERSION }] },
-    component: { type: 'application', 'bom-ref': 'alon-studio', name: 'ALON.ai Studio (portable Windows package)', version: VERSION, properties: [{ name: 'alon:fileCount', value: String(files.length) }, { name: 'alon:fullManifest', value: 'SHA256SUMS.txt' }] },
+    component: { type: 'application', 'bom-ref': 'alon-studio', name: 'ALON.ai Studio (portable Windows package)', version: VERSION, licenses: [{ expression: LICENSE }], properties: [{ name: 'alon:fileCount', value: String(files.length) }, { name: 'alon:fullManifest', value: 'SHA256SUMS.txt' }] },
   },
   components,
   dependencies: [
@@ -177,8 +177,8 @@ p('  FFmpeg source code: https://ffmpeg.org/download.html  (git: https://github.
 p('runtime/python/Lib/site-packages/av.libs/*.dll: FFmpeg libraries inside the PyAV wheel, GPL v3 or later.');
 p('  Build scripts and sources: https://github.com/PyAV-Org/pyav-ffmpeg');
 p('');
-p('ALON.ai Studio runs ffmpeg.exe and ffprobe.exe as separate programs; the GPL applies to those');
-p('programs, not to ALON.ai Studio\'s own code. The GPL v3 text is below.');
+p(`ALON.ai Studio's own code is licensed under ${LICENSE} as well (LICENSE.txt). It runs ffmpeg.exe and`);
+p('ffprobe.exe as separate programs. The GPL v3 text is below.');
 p(HR);
 p('COMPONENTS');
 p('');

@@ -47,9 +47,12 @@ for (const [n, name, cmd, args, extra] of gates) {
   const lines = out.trim().split(/\r?\n/).filter((l) => l.trim());
   const fails = lines.filter((l) => /\bFAIL(ED)?\b|error TS\d+/.test(l)).slice(0, 5);
   const pass = r.status === 0;
-  rows.push({ n, name, pass, secs: Math.round((Date.now() - t0) / 1000), summary: pass ? (lines.at(-1) ?? '').slice(0, 70) : fails.join(' | ').slice(0, 300) || (lines.at(-1) ?? '') });
-  console.log(`${pass ? 'PASS' : 'FAIL'}  ${n}. ${name}  (${rows.at(-1).secs}s)  ${rows.at(-1).summary}`);
+  // a gate with nothing to check exits 0 and prints a line starting with SKIPPED
+  const skip = pass && lines.some((l) => l.startsWith('SKIPPED'));
+  rows.push({ n, name, pass, skip, secs: Math.round((Date.now() - t0) / 1000), summary: pass ? (lines.at(-1) ?? '').slice(0, 70) : fails.join(' | ').slice(0, 300) || (lines.at(-1) ?? '') });
+  console.log(`${skip ? 'SKIP' : pass ? 'PASS' : 'FAIL'}  ${n}. ${name}  (${rows.at(-1).secs}s)  ${rows.at(-1).summary}`);
 }
 const bad = rows.filter((r) => !r.pass);
-console.log(bad.length ? `\n${bad.length} GATE(S) FAILED - logs in ${logDir}` : `\nALL ${rows.length} GATES GREEN`);
+const skipped = rows.filter((r) => r.skip).length;
+console.log(bad.length ? `\n${bad.length} GATE(S) FAILED - logs in ${logDir}` : `\nALL ${rows.length - skipped} GATES GREEN${skipped ? `, ${skipped} SKIPPED` : ''}`);
 process.exit(bad.length ? 1 : 0);

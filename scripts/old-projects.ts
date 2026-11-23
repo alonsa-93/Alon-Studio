@@ -20,11 +20,21 @@ const BASELINE = process.env.PARITY_BASELINE ?? path.join(os.tmpdir(), 'alon-tes
 /** Which projects: the arguments, else OLD_PROJECTS (comma separated), else the ones that already have a
  *  baseline, else the first 3 in the source folder. A fresh checkout has none: the gate is skipped. */
 function pickProjects(): string[] {
-  if (process.argv.slice(2).length) return process.argv.slice(2);
+  const args = process.argv.slice(2);
+  if (args.length) return args;
   if (process.env.OLD_PROJECTS) return process.env.OLD_PROJECTS.split(',').map((s) => s.trim()).filter(Boolean);
   const dir = path.join(SRC, 'projects');
-  const found = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^p_\w+\.json$/.test(f)).map((f) => f.slice(0, -5)).sort() : [];
-  const withBaseline = fs.existsSync(BASELINE) ? found.filter((id) => fs.existsSync(path.join(BASELINE, id))) : [];
+  // only projects with something to export whose media is still on disk
+  const usable = (id: string) => {
+    try {
+      const p = JSON.parse(fs.readFileSync(path.join(dir, `${id}.json`), 'utf8'));
+      return p.clips?.length > 0 && p.media.every((m: { file: string }) => fs.existsSync(path.join(SRC, 'media', m.file)));
+    } catch {
+      return false;
+    }
+  };
+  const found = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^p_\w+\.json$/.test(f)).map((f) => f.slice(0, -5)).sort().filter(usable) : [];
+  const withBaseline = found.filter((id) => fs.existsSync(path.join(BASELINE, id, 'meta.json')));
   return (withBaseline.length ? withBaseline : found).slice(0, 3);
 }
 const IDS = pickProjects();

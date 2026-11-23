@@ -26,10 +26,11 @@ interface SfxDef {
 }
 
 const ev = (expr: string, d: number) => `aevalsrc=exprs='${expr}':d=${d}:s=48000`;
-const noise = (d: number, c = 'white', a = 0.8) => `anoisesrc=d=${d}:c=${c}:r=48000:a=${a}`;
+// a fixed seed: the same effect sounds the same every time it is made (a random draw could come out too quiet)
+const noise = (d: number, c = 'white', a = 0.8) => `anoisesrc=d=${d}:c=${c}:r=48000:a=${a}:seed=1`;
 
 export const SFX: SfxDef[] = [
-  { id: 'whoosh', group: 'motion', name: 'וווש', duration: 0.7, source: 'anoisesrc=d=0.7:c=pink:r=48000:a=0.9', filter: 'bandpass=f=1400:w=1100,afade=t=in:d=0.3:curve=qsin,afade=t=out:st=0.3:d=0.4,volume=40dB,alimiter=limit=0.7' },
+  { id: 'whoosh', group: 'motion', name: 'וווש', duration: 0.7, source: noise(0.7, 'pink', 0.9), filter: 'bandpass=f=1400:w=1100,afade=t=in:d=0.3:curve=qsin,afade=t=out:st=0.3:d=0.4,volume=40dB,alimiter=limit=0.7' },
   { id: 'pop', group: 'ui', name: 'פופ', duration: 0.15, source: ev('0.8*sin(2*PI*(520-1400*t)*t)*exp(-32*t)', 0.15) },
   { id: 'click', group: 'ui', name: 'קליק', duration: 0.06, source: ev('0.7*sin(2*PI*1900*t)*exp(-160*t)', 0.06) },
   { id: 'ding', group: 'tones', name: 'דינג', duration: 1.4, source: ev('0.45*sin(2*PI*1320*t)*exp(-3.5*t)+0.2*sin(2*PI*2640*t)*exp(-5*t)', 1.4) },
@@ -38,8 +39,8 @@ export const SFX: SfxDef[] = [
   { id: 'riser', group: 'motion', name: 'עלייה', duration: 2.0, source: ev('0.35*sin(2*PI*(180+380*t)*t)*min(t/1.6\\,1)', 2.0), filter: 'afade=t=out:st=1.9:d=0.1' },
   { id: 'notify', group: 'ui', name: 'התראה', duration: 0.6, source: ev('0.4*sin(2*PI*1046.5*t)*exp(-9*t)+0.35*sin(2*PI*1568*t)*exp(-8*max(t-0.12\\,0))*gte(t\\,0.12)', 0.6) },
   { id: 'error', group: 'ui', name: 'שגיאה', duration: 0.45, source: ev('0.3*(sin(2*PI*160*t)+sin(2*PI*166*t))*lt(mod(t\\,0.24)\\,0.17)', 0.45) },
-  { id: 'swipe', group: 'motion', name: 'החלקה', duration: 0.35, source: 'anoisesrc=d=0.35:c=white:r=48000:a=0.7', filter: 'highpass=f=2500,afade=t=in:d=0.12,afade=t=out:st=0.12:d=0.23,volume=1.5' },
-  { id: 'swish', group: 'motion', name: 'סוויש', duration: 0.4, source: noise(0.4), filter: 'bandpass=f=3200:w=2600,afade=t=in:d=0.12:curve=qsin,afade=t=out:st=0.12:d=0.28,volume=26dB,alimiter=limit=0.7' },
+  { id: 'swipe', group: 'motion', name: 'החלקה', duration: 0.35, source: noise(0.35, 'white', 0.7), filter: 'highpass=f=2500,afade=t=in:d=0.12,afade=t=out:st=0.12:d=0.23,volume=1.5' },
+  { id: 'swish', group: 'motion', name: 'סוויש', duration: 0.4, source: noise(0.4), filter: 'bandpass=f=3200:w=2600,afade=t=in:d=0.12:curve=qsin,afade=t=out:st=0.12:d=0.28,volume=32dB,alimiter=limit=0.7' },
   { id: 'tape-stop', group: 'motion', name: 'עצירת קלטת', duration: 0.9, source: ev('0.5*sin(2*PI*(220*t-110*t*t/0.9))*(1-t/0.9)+0.25*sin(2*PI*(440*t-220*t*t/0.9))*(1-t/0.9)', 0.9) },
   { id: 'drop', group: 'motion', name: 'נפילה', duration: 0.8, source: ev('0.45*sin(2*PI*(1200*t-650*t*t))*exp(-1.5*t)', 0.8), filter: 'afade=t=out:st=0.6:d=0.2' },
   { id: 'zip', group: 'motion', name: 'רוכסן', duration: 0.35, source: ev('0.4*sin(2*PI*(300*t+2400*t*t))*lt(mod(t\\,0.018)\\,0.009)', 0.35), filter: 'afade=t=out:st=0.25:d=0.1' },
@@ -62,7 +63,7 @@ export const SFX: SfxDef[] = [
   { id: 'jump', group: 'tones', name: 'קפיצה', duration: 0.3, source: ev('0.6*(2*gte(sin(2*PI*(300*t+1500*t*t))\,0)-1)*exp(-5*t)', 0.3) },
 ];
 
-const SFX_VERSION = 'v3';
+const SFX_VERSION = 'v4';
 const pending = new Map<string, Promise<string>>();
 
 export function sfxFile(id: string): Promise<string> {

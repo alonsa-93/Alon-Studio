@@ -97,6 +97,25 @@ Because the zip is not signed, Windows marks it as downloaded from the internet.
 
 `npm run release:setup` builds an Inno Setup `ALON-Studio-Setup.exe`. Smart App Control blocks unsigned installers, so it is only useful once code signing is set up.
 
+## 🧯 Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| Double-click does nothing, or Smart App Control says it blocked the file | The zip was not unblocked before extracting. Delete the extracted folder, tick **Unblock** in the zip's Properties, extract again. Or run `Get-ChildItem -Recurse \| Unblock-File` in the extracted folder. |
+| Blue "Windows protected your PC" | **More info** > **Run anyway**. |
+| "Extract the zip first" or "files are missing" from `התקנה.cmd` | It was started from inside the zip. Use **Extract All** first. |
+| Extracting fails with a path that is too long | Extract to a short path such as `C:\ALON`. |
+| "Installation failed" | The message gives the reason; the full log is `%TEMP%\alon-studio-install.log`. Usually disk space (about 1 GB) or an antivirus quarantine. Installing again is safe. |
+| Antivirus quarantined `node.exe` or `ffmpeg.exe` | Restore it and add an exception, or extract again. They are the official Node.js and FFmpeg builds. |
+| The page says the access key is missing (401) | Open the studio only from its shortcut or `ALON Studio.cmd`, which hands the window a secret key. A bookmark to `localhost:5199` does not work. |
+| No window opens at all | Check `studio.log` (below). "used by another program" means another program holds port 5199. Restarting Windows also clears a stuck copy. |
+| No Edge or Chrome | The window needs one of them. |
+| First automatic captions are slow or fail | The Whisper model (about 1.5 GB) downloads once and needs internet and disk space. Try again if it was interrupted. |
+| A phone video (HEVC) does not play in the preview | A preview copy is made automatically; wait a few seconds. Export always uses the original. |
+| Not listed under Settings > Apps | Run `התקנה.cmd` again, then uninstall. Or delete `%LOCALAPPDATA%\Programs\ALON Studio` and the shortcuts. |
+
+The studio's log is `Documents\ALON Studio\studio.log`. It can contain file and project names, so look before attaching it to an [issue](https://github.com/alonsa-93/Alon-Studio/issues).
+
 ## 🛠️ Development
 - `npm start`: the server and the UI on one port (5173). `npm run dev`: the same, restarting on server changes.
 - `npm run typecheck` · `npm run security:check` · `npm run release` · `npm run release:docs` · `npm run release:zip`.

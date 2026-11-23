@@ -2,7 +2,12 @@ name: ci
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -22,7 +27,7 @@ jobs:
       - name: Logic regression and both UI languages (gate 2, without the server part)
         run: npx tsx scripts/regress.ts
         env:
-          BASE_URL: http://127.0.0.1:9
+          REGRESS_OFFLINE: '1'
           ALON_DATA_DIR: ${{ runner.temp }}/alon-ci-data
       - name: Known vulnerabilities in npm dependencies
         run: npm audit --audit-level=high
